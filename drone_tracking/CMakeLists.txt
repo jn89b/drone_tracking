@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(utm)
-
-# set this to path to AirSim root folder if you want your catkin workspace in a custom directory
-set(AIRSIM_ROOT /home/jnguyen/AirSim/)
+project(drone_tracking)
 
 # todo eigen3 in AirLib already
 # find_package(Eigen3 REQUIRED) 
@@ -11,8 +8,6 @@ find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
-  airsim_ros_pkgs
-  airsim_tutorial_pkgs
   apriltag_ros
   cv_bridge
   image_transport
@@ -57,16 +52,11 @@ catkin_package(
   message_runtime 
   roscpp 
   std_msgs 
-  airsim_ros_pkgs
-  airsim_tutorial_pkgs
 )
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${airsim_ros_pkgs_INCLUDE_DIRS}
-  ${AIRSIM_ROOT}/AirLib/deps/eigen3
-  ${AIRSIM_ROOT}/AirLib/include
   ${RPC_LIB_INCLUDES}
   ${AIRSIM_ROOT}/MavLinkCom/include
   ${AIRSIM_ROOT}/MavLinkCom/common_utils
@@ -122,7 +112,6 @@ install(TARGETS
 )
 
 catkin_install_python(PROGRAMS
-    scripts/drone_image_raw.py
     scripts/offboard_drone.py
     scripts/apriltag_position_pub.py
     scripts/mavros_tf.py
