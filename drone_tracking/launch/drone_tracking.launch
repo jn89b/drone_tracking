@@ -1,0 +1,14 @@
+<launch>
+<!--launch px4 first then launch this-->
+
+    <!-- launch mavros protocol-->
+    <include file="$(find utm)/launch/mavros_gcs_launch.launch"/>
+
+    <!-- launch camera plugin-->
+    <include file="$(find utm)/launch/apriltag_camera_launch.launch"/>
+
+    <!-- launch tf broadcaster-->
+    <include file="$(find utm)/launch/broadcast_tf.launch"/>
+    
+
+</launch>

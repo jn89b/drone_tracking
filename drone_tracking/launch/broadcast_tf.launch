@@ -1,0 +1,28 @@
+<launch>
+
+    <!--args for mavros tf-->
+    <arg name="tf_quad" default="/drone0_wrt_world"/>
+    <arg name="world_tf" default="/world_enu"/>
+
+    <!--args for apriltag_position_pub.py-->
+    <arg name="id_tag" default="0"/>
+    <arg name="rtagdrone" default="/tag_wrt_drone0"/>
+    <arg name="frame_tag_id" default="/tag_0"/>
+    <arg name="height_from_tag" default="1.0"/>
+
+    <!--running mavros_tf.py-->
+    <node pkg="utm" type="mavros_tf.py" name="mavros_tf">
+        <param name="quad_tf" value="$(arg tf_quad)"/>
+        <param name="world_tf" value="$(arg world_tf)"/> 
+    </node>
+
+    <!--apriltag position pub-->
+    <node pkg="utm" type="apriltag_position_pub.py" name="apriltag_position_pub">
+        <param name="tag_id" value="$(arg id_tag)"/>
+        <param name="rtag_drone" value="$(arg rtagdrone)"/>
+        <param name="quad_tf" value="$(arg tf_quad)"/>
+        <param name="tag_frame_id" value="$(arg frame_tag_id)"/> 
+        <param name="alt_from_tag" value="$(arg height_from_tag)"/>  
+    </node>
+
+</launch>
