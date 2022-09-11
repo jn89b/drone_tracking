@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(drone_tracking)
 
-# todo eigen3 in AirLib already
 # find_package(Eigen3 REQUIRED) 
 find_package(Boost REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -30,20 +29,21 @@ find_package(catkin REQUIRED COMPONENTS
   ${catkin_LIBRARIES} 
 )
 
-#add_message_files(
-#  FILES
-#)
+add_message_files(
+ FILES
+ LQRGain.msg
+)
 
 #add_service_files(
 #  FILES
 #)
 
-#generate_messages(
-#  DEPENDENCIES
-#  std_msgs
-#  geometry_msgs
-#  geographic_msgs
-#)
+generate_messages(
+ DEPENDENCIES
+ std_msgs
+ geometry_msgs
+ geographic_msgs
+)
 
 catkin_package(
   # LIBRARIES airsim_ros
@@ -58,50 +58,22 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${RPC_LIB_INCLUDES}
-  ${AIRSIM_ROOT}/MavLinkCom/include
-  ${AIRSIM_ROOT}/MavLinkCom/common_utils
   ${OpenCV_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-## Declare a cpp library
-#add_library(PID src/PID.cpp)
-#target_link_libraries(PID ${catkin_LIBRARIES})
-#add_executable(null_test src/null_test.cpp)
-#add_dependencies(null_test ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(null_test ${catkin_LIBRARIES})
-
-add_executable(main_null src/main_null.cpp src/null_test.cpp)
-add_dependencies(main_null ${catkin_EXPORTED_TARGETS})
-target_link_libraries(main_null  ${catkin_LIBRARIES})
-
-add_executable(test_track src/test_track.cpp src/PID.cpp)
-add_dependencies(test_track ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_track  ${catkin_LIBRARIES})
-
-add_executable(offboard_test src/offboard_test.cpp src/PID.cpp src/moving_avg.cpp)
-add_dependencies(offboard_test ${catkin_EXPORTED_TARGETS})
-target_link_libraries(offboard_test  ${catkin_LIBRARIES})
-
-add_executable(offboard_example src/offboard_example.cpp)
-target_link_libraries(offboard_example ${catkin_LIBRARIES})
-
-add_executable(offboard_tracking src/offboard_tracking.cpp)
-target_link_libraries(offboard_tracking ${catkin_LIBRARIES})
-
-add_executable(moving_avg_main src/moving_avg_main.cpp src/moving_avg.cpp)
-add_dependencies(moving_avg_main ${catkin_EXPORTED_TARGETS})
-target_link_libraries(moving_avg_main  ${catkin_LIBRARIES})
-
-add_executable(test_user src/test_user.cpp )
-add_dependencies(test_user ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_user  ${catkin_LIBRARIES})
 
 
 ##################
 ##  Install #####
 #################
+
+
+
+add_executable(uas_px4_main src/uas_px4_main.cpp src/PID.cpp src/uas_px4.cpp)
+add_dependencies(uas_px4_main ${catkin_EXPORTED_TARGETS})
+target_link_libraries(uas_px4_main  ${catkin_LIBRARIES})
 
 
 install(TARGETS
@@ -121,7 +93,6 @@ catkin_install_python(PROGRAMS
     scripts/logger.py
     scripts/user_control.py
 #    #list of shared libraries
-#    airsim_ros
 #    pd_position_controller_simple
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

@@ -25,11 +25,11 @@ void PID::calcPID(float target, float current, float pre_error, float pre_ierror
     //target x and target y is the position relative to quad 
     float error = target;
     
-    //stop adjusting if error is less than tolerance
-    if (error <= 0.10)
-    {   
-        _PID = 0.0;          
-    }
+    // //stop adjusting if error is less than tolerance
+    // if (error <= 0.25)
+    // {   
+    //     _PID = 0.0;          
+    // }
 
     float Pgain = _kp * error;
     float int_error = pre_ierror + ((error + pre_error)/ 2) * _dt;
@@ -41,7 +41,7 @@ void PID::calcPID(float target, float current, float pre_error, float pre_ierror
     float PID = Pgain + Igain + Dgain;
     
     //set gain constraint to prevent the guy from going to crazy
-    float gain_constraint = 2.0;
+    const float gain_constraint = 3.5;
 
     if (PID >= gain_constraint)
         {

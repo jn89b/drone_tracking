@@ -1,0 +1,14 @@
+<launch>
+
+    <arg name="vehicle" default="iris"/>
+    <arg name="model" default="iris_depth_camera"/>
+    <!-- <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg model)/$(arg model).sdf"/> -->
+    <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/iris_downward_depth_camera/iris_downward_depth_camera.sdf"/>
+
+    <!--Launche-->
+    <include file="$(find px4)/launch/mavros_posix_sitl.launch">        
+        <arg name="vehicle" value="$(arg vehicle)"/>
+        <arg name="sdf" value="$(arg sdf)"/>
+    </include>
+
+</launch>
