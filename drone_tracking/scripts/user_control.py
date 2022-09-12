@@ -1,4 +1,4 @@
-#!/usr/bin env python3
+#!/usr/bin/env python
 
 import rospy
 import tf
@@ -34,10 +34,9 @@ class UserControl():
         }
         self.cmd = None
 
-        self.user_control_pub = rospy.Publisher("user_control", Int8, queue_size= 10)
-        self.pub = rospy.Publisher("precland", Bool, queue_size=10)
-        self.sub = rospy.Subscriber("target_found", Bool, self.target_foundcb)
-        quad_odom_sub = rospy.Subscriber("mavros/offset_local_position/pose", PoseStamped, self.quad_odom_cb)
+        self.user_control_pub = rospy.Publisher("utm_control", Int8, queue_size= 10)
+        self.pub = rospy.Publisher("/precland", Bool, queue_size=10)
+        self.sub = rospy.Subscriber("/target_found", Bool, self.target_foundcb)
         
         self.user_input = Int8()
         
@@ -80,18 +79,19 @@ class UserControl():
         print("I'm disarming")
 
     def waypoint_cmd(self):
-        print("Waypoint cmd")
-
+        self.user_input.data = 0
+        #print("im tracking")
+        self.user_control_pub.publish(self.user_input)
 
     def run(self):
-        rate = 30
+        rate = 1
         rate = rospy.Rate(rate)
-
+        print("Commands are as follows :", self.user_cmds_dict.keys())
         self.cmd = input("Enter your command: ")
         
         if self.cmd in self.user_cmds_dict:
             print("Starting command", self.cmd, ",to exit press ENTER")
-
+    
             while True:
                 try:
                     self.user_cmds_dict.get(self.cmd)()
@@ -107,7 +107,7 @@ def main():
     usercontrol.run()
 
 if __name__=='__main__':
-    rospy.init_node("user_control", anonymous=True, disable_signals=True)
+    rospy.init_node("user_control", anonymous=False, disable_signals=True)
     while True:
         main()    
    

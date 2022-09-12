@@ -1,9 +1,16 @@
 <launch>
 
+    <arg name="drone_frame" default="base_link" />
+    <arg name="camera_frame" default="camera_link" />
+  
+    <!-- IMPORTANT. TF from drone to camera frames assuming camera is static-->
+    <node pkg="tf" type="static_transform_publisher" name="tf_drone_to_camera" 
+              args="0.1 0 -0.1 -1.57 0 -3.1415 $(arg drone_frame) $(arg camera_frame) 33"/>
+
     <!--args for apritag_ros-->
     <arg name="launch_prefix" default="" /> <!-- set to value="gdbserver localhost:10000" for remote debugging -->
     <arg name="node_namespace" default="apriltag_ros_continuous_node" />
-    <arg name="camera_name" default="/iris/usb_cam" />
+    <arg name="camera_name" default="/camera/rgb" />
     <!-- <arg name="camera_frame" default="/robot_camera_link" /> -->
     <arg name="image_topic" default="image_rect" />
     
@@ -12,7 +19,7 @@
     pkg="image_proc" 
     type="image_proc" 
     name="image_proc" 
-    ns="/iris/usb_cam">
+    ns="$(arg camera_name)">
     </node>
 
     <!--Run apriltag ros-->
@@ -24,10 +31,6 @@
         <arg name="image_topic" value="$(arg image_topic)" />
 	</include>
 
-    <!-- ekf apriltag estimation
-    <node 
-    pkg="drone_tracking"
-    type="ekf_tag.py"
-    name="ekf_tag"/> -->
+    <node pkg="drone_tracking" type="ekf_tag.py" name="ekf_tag"/>
     
 </launch>       

@@ -4,40 +4,42 @@ PX4Drone::PX4Drone(ros::NodeHandle* nh, std::vector<float> offset_pos)
 {
     //subscribers
     state_sub = nh->subscribe<mavros_msgs::State>
-            ("uav0/mavros/state", 30, &PX4Drone::state_cb, this);
+            ("mavros/state", 30, &PX4Drone::state_cb, this);
             
     quad_odom_sub = nh->subscribe<nav_msgs::Odometry>
-        ("uav0/mavros/odometry/in",30, &PX4Drone::quad_odom_cb, this);
+        ("mavros/odometry/in",30, &PX4Drone::quad_odom_cb, this);
 
     true_quad_odom_sub = nh->subscribe<geometry_msgs::PoseStamped>
-                    ("uav0/mavros/local_position/pose",30, &PX4Drone::true_odom_cb, this);
+                    ("mavros/local_position/pose",30, &PX4Drone::true_odom_cb, this);
     
     local_pos_pub = nh->advertise<geometry_msgs::PoseStamped>
-            ("uav0/mavros/setpoint_position/local", 30);
+            ("mavros/setpoint_position/local", 30);
     
     vel_pub = nh->advertise<geometry_msgs::TwistStamped>
-            ("uav0/mavros/setpoint_velocity/cmd_vel", 30);
+            ("mavros/setpoint_velocity/cmd_vel", 30);
 
     att_pub = nh->advertise<mavros_msgs::AttitudeTarget>
-            ("uav0/mavros/setpoint_raw/attitude", 30);
+            ("mavros/setpoint_raw/attitude", 30);
 
     //raw publisher
     cmd_raw = nh->advertise<mavros_msgs::AttitudeTarget>
-            ("uav0/mavros/setpoint_raw/attitude", 30);
+            ("mavros/setpoint_raw/attitude", 30);
 
     //apriltag crap
     rtag_quad_sub = nh->subscribe<geometry_msgs::PoseStamped>
-            ("uav0/tag/pose", 30, &PX4Drone::rtagquad_cb,this); 
+            ("tag/pose", 30, &PX4Drone::rtagquad_cb,this); 
+
     rtag_ekf_sub = nh->subscribe<geometry_msgs::PoseStamped>
-            ("uav0/mavros/vision_pose/pose", 30, &PX4Drone::kftag_cb,this);
+            ("mavros/vision_pose/pose", 30, &PX4Drone::kftag_cb,this);
+    
     rtag_ekf_vel_sub = nh->subscribe<geometry_msgs::TwistStamped>
-            ("uav0/kf_tag/vel", 30, &PX4Drone::kftag_vel_cb,this);
+            ("kf_tag/vel", 30, &PX4Drone::kftag_vel_cb,this);
 
     //services
     arming_client = nh->serviceClient<mavros_msgs::CommandBool>
-        ("uav0/mavros/cmd/arming");
+        ("mavros/cmd/arming");
     set_mode_client = nh->serviceClient<mavros_msgs::SetMode>
-            ("uav0/mavros/set_mode");
+            ("mavros/set_mode");
 
     //service input
     service_input_sub = nh->subscribe<std_msgs::Int8>
@@ -46,7 +48,6 @@ PX4Drone::PX4Drone(ros::NodeHandle* nh, std::vector<float> offset_pos)
     //lqr crap
     lqr_gain_sub = nh->subscribe<drone_tracking::LQRGain>
                     ("K_gain", 30, &PX4Drone::lqr_cb,this);
-
 
     //velocity
     // offset_pos = {0,0};
@@ -80,8 +81,6 @@ void PX4Drone::init_vals(std::vector<float> offset_pos)
     pre_ierror_x = 0.0;
     pre_ierror_y = 0.0;
 }
-
-
 
 
 //recieve state of quad
@@ -121,11 +120,14 @@ void PX4Drone::true_odom_cb(const geometry_msgs::PoseStamped::ConstPtr& msg)
 void PX4Drone::setmode_arm(ros::Time last_request,
 const std::string& mode_input, mavros_msgs::CommandBool arm_cmd)
 {
+
+    ROS_INFO("Setting mode arm");
+
     if( current_state.mode != mode_input &&
         (ros::Time::now() - last_request > ros::Duration(5.0))){
         if( set_mode_client.call(set_mode) &&
             set_mode.response.mode_sent){
-            //ROS_INFO("Offboard enabled");
+            ROS_INFO("Mode enabled");
         }
         last_request = ros::Time::now();
     } else {
@@ -133,7 +135,7 @@ const std::string& mode_input, mavros_msgs::CommandBool arm_cmd)
             (ros::Time::now() - last_request > ros::Duration(5.0))){
             if( arming_client.call(arm_cmd) &&
                 arm_cmd.response.success){
-                //ROS_INFO("Vehicle armed");
+                ROS_INFO("Vehicle armed");
             }
             last_request = ros::Time::now();
         }
@@ -377,7 +379,6 @@ void PX4Drone::set_offboard(std::vector<float> pos_cmd,  ros::Rate rate)
 {
     while ((ros::ok()) && (current_state.mode != "OFFBOARD"))
     {   
-        // std::cout<<"sending command"<<std::endl;
         ros::Time last_request = ros::Time::now();
         
         if (current_state.mode == "OFFBOARD")

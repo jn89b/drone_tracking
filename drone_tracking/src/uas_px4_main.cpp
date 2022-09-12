@@ -43,12 +43,6 @@ double calc_heading(std::vector<float> some_vec)
     return yaw;
 }
 
-// void websling_cb(const geometry_msgs::PoseStamped::ConstPtr& msg)
-// {
-//     websling[0] = msg->pose.position.x;
-//     websling[1] = msg->pose.position.y;
-    
-// }
 
 int main(int argc, char **argv)
 {
@@ -61,7 +55,7 @@ int main(int argc, char **argv)
     const float heading_bound = M_PI/6; //45 degrees
     const float rate_val = 20.0;    
 
-    ros::init(argc, argv, "test_px4_header");
+    ros::init(argc, argv, "px4");
     ros::NodeHandle _nh; // create a node handle; need to pass this to the class constructor
     ros::Rate rate(rate_val);
 
@@ -72,9 +66,9 @@ int main(int argc, char **argv)
     double at_yaw = 0.0;
 
     //this should be from parameters
-    std::vector<float> init_pos = {5.0, 5.0, 30.0};
+    std::vector<float> init_pos = {1.0, 1.0, 15.0};
     px4drone.send_init_cmds(init_pos, rate);
-    px4drone.set_mode.request.custom_mode = "AUTO.LAND";
+    px4drone.set_mode.request.custom_mode = "OFFBOARD";
     px4drone.arm_cmd.request.value = true;
 
     ros::Time last_request = ros::Time::now();
@@ -87,6 +81,7 @@ int main(int argc, char **argv)
         PID pid_y(kp, ki, kd, dt, px4drone.kf_tag[1], px4drone.odom[1]);
 
         PID pid_yaw(kp, ki, kd, dt, at_yaw, drone_yaw);
+        std::cout<<"starting"<< px4drone.user_cmd<< std::endl;
 
         switch(px4drone.user_cmd)
         {
@@ -111,41 +106,41 @@ int main(int argc, char **argv)
                 px4drone.lqr_land(-0.5, rate);
                 break;
             }
-            // case 2: // TRACKING WITH pid
-            // {   
-            //     float p_x = pid_x.getPID();
-            //     float p_y = pid_y.getPID();
+            case 2: // TRACKING WITH pid
+            {   
+                float p_x = pid_x.getPID();
+                float p_y = pid_y.getPID();
 
-            //     float p_yaw = pid_yaw.getPID();
-            //     Eigen::Vector2d gain(p_x, p_y);
-            //     Eigen::Vector2d no_gain(0, 0);
+                float p_yaw = pid_yaw.getPID();
+                Eigen::Vector2d gain(p_x, p_y);
+                Eigen::Vector2d no_gain(0, 0);
  
-            //     {
-            //         if ((abs(gain[0])<= gain_tol) && (abs(gain[1]) <= gain_tol)){
-            //             std::cout<<"good enough"<<gain<<std::endl;
-            //             px4drone.send_yaw_cmd(no_gain, init_pos[2], drone_yaw);
-            //             // px4drone.send_velocity_cmd(no_gain);    
-            //         } 
+                {
+                    if ((abs(gain[0])<= gain_tol) && (abs(gain[1]) <= gain_tol)){
+                        std::cout<<"good enough"<<gain<<std::endl;
+                        px4drone.send_yaw_cmd(no_gain, init_pos[2], drone_yaw);
+                        // px4drone.send_velocity_cmd(no_gain);    
+                    } 
                     
-            //         else if((abs(gain[0])>= gain_tol) && (abs(gain[1]) <= gain_tol)){
-            //             Eigen::Vector2d x_gain(p_x, 0);
-            //             px4drone.send_yaw_cmd(x_gain, init_pos[2], drone_yaw);
-            //             // px4drone.send_velocity_cmd(no_gain);    
-            //         } 
+                    else if((abs(gain[0])>= gain_tol) && (abs(gain[1]) <= gain_tol)){
+                        Eigen::Vector2d x_gain(p_x, 0);
+                        px4drone.send_yaw_cmd(x_gain, init_pos[2], drone_yaw);
+                        // px4drone.send_velocity_cmd(no_gain);    
+                    } 
                     
-            //         else if((abs(gain[1])>= gain_tol) && (abs(gain[0]) <= gain_tol)){
-            //             Eigen::Vector2d y_gain(0, p_x);
-            //             px4drone.send_yaw_cmd(y_gain, init_pos[2], drone_yaw);
-            //             // px4drone.send_velocity_cmd(no_gain);    
-            //         } 
+                    else if((abs(gain[1])>= gain_tol) && (abs(gain[0]) <= gain_tol)){
+                        Eigen::Vector2d y_gain(0, p_x);
+                        px4drone.send_yaw_cmd(y_gain, init_pos[2], drone_yaw);
+                        // px4drone.send_velocity_cmd(no_gain);    
+                    } 
                     
-            //         else{
-            //             px4drone.send_yaw_cmd(gain, init_pos[2], drone_yaw);
-            //             // px4drone.send_velocity_cmd(vel_gain);
-            //         }
-            //     }   
-            //     break;
-            // }
+                    else{
+                        px4drone.send_yaw_cmd(gain, init_pos[2], drone_yaw);
+                        // px4drone.send_velocity_cmd(vel_gain);
+                    }
+                }   
+                break;
+            }
             // case 2: //precland
             // {
             //     float p_x = pid_x.getPID();

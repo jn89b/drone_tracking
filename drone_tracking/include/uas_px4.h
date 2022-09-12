@@ -68,7 +68,6 @@ class PX4Drone
         std::vector<float> vel;
         std::vector<float> kf_vel;
         
-        int user_cmd;
         mavros_msgs::SetMode set_mode;
         mavros_msgs::CommandBool arm_cmd;
         mavros_msgs::State current_state;

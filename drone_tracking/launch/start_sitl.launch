@@ -1,0 +1,11 @@
+<launch>
+    
+    <!---->
+    <include file="$(find drone_tracking)/launch/px4_sitl.launch"></include>
+
+    <include file="$(find drone_tracking)/launch/apriltag_sitl.launch"></include>
+
+    <include file="$(find drone_tracking)/launch/broadcast_tf.launch"></include>
+
+
+</launch>

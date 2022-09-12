@@ -71,9 +71,17 @@ include_directories(
 
 
 
-add_executable(uas_px4_main src/uas_px4_main.cpp src/PID.cpp src/uas_px4.cpp)
-add_dependencies(uas_px4_main ${catkin_EXPORTED_TARGETS})
-target_link_libraries(uas_px4_main  ${catkin_LIBRARIES})
+# add_executable(uas_px4_main src/uas_px4_main.cpp src/PID.cpp src/uas_px4.cpp)
+# add_dependencies(uas_px4_main ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(uas_px4_main  ${catkin_LIBRARIES})
+
+add_executable(cpp_offboard_ex src/cpp_offboard_ex.cpp)
+add_dependencies(cpp_offboard_ex ${catkin_EXPORTED_TARGETS})
+target_link_libraries(cpp_offboard_ex  ${catkin_LIBRARIES})
+
+add_executable(px4_offboard_main src/px4_offboard_main.cpp src/PID.cpp src/px4_offboard.cpp)
+add_dependencies(px4_offboard_main ${catkin_EXPORTED_TARGETS})
+target_link_libraries(px4_offboard_main  ${catkin_LIBRARIES})
 
 
 install(TARGETS
@@ -92,6 +100,10 @@ catkin_install_python(PROGRAMS
     scripts/land_permission.py
     scripts/logger.py
     scripts/user_control.py
+    scripts/offb_node_example.py
+
+    
+    scripts/controller/lqr.py
 #    #list of shared libraries
 #    pd_position_controller_simple
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

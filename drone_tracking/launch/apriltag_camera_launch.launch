@@ -1,15 +1,21 @@
 <launch>
 
+  <arg name="drone_frame" default="base_link" />
+  <arg name="camera_frame" default="robot_camera_link" />
+
+  <!-- IMPORTANT. TF from drone to camera frames assuming camera is static-->
+  <node pkg="tf" type="static_transform_publisher" name="tf_drone_to_camera" 
+            args="3.65 2.65 -0.1 -1.57 0 -3.1415 $(arg drone_frame) $(arg camera_frame) 33"/>
+
     <!--args for apritag_ros-->
-    <arg name="launch_prefix" default="" /> <!-- set to value="gdbserver localhost:10000" for remote debugging -->
+    <arg name="launch_prefix" default="" /> 
     <arg name="node_namespace" default="apriltag_ros_continuous_node" />
     <arg name="camera_name" default="/csi_camera_0" />
     <arg name="camera_frame" default="/csi_camera_link" />
     <arg name="image_topic" default="image_rect" />
     
     <!--Run image proc-->
-    <node 
-    pkg="image_proc" 
+    <node pkg="image_proc" 
     type="image_proc" 
     name="image_proc" 
     ns="/csi_camera_0">
@@ -17,7 +23,7 @@
 
     <!--Run apriltag ros-->
     <include file="$(find apriltag_ros)/launch/continuous_detection.launch">
-        <arg name="launch_prefix" value="$(arg launch_prefix)" /> <!-- set to value="gdbserver localhost:10000" for remote debugging -->
+        <arg name="launch_prefix" value="$(arg launch_prefix)" /> 
         <arg name="node_namespace" value="$(arg node_namespace)" />
         <arg name="camera_name" value="$(arg camera_name)" />
         <arg name="camera_frame" value="$(arg camera_frame)" />

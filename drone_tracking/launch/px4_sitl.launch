@@ -4,11 +4,18 @@
     <arg name="model" default="iris_depth_camera"/>
     <!-- <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg model)/$(arg model).sdf"/> -->
     <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/iris_downward_depth_camera/iris_downward_depth_camera.sdf"/>
+    <arg name="world" default="$(find drone_tracking)/simulations/worlds/apriltag_world.world"/>
 
+
+    <!--load pid configs param yaml-->
+    <rosparam command="load" file="$(find drone_tracking)/config/pid_params.yaml"/>    
+    
     <!--Launche-->
     <include file="$(find px4)/launch/mavros_posix_sitl.launch">        
         <arg name="vehicle" value="$(arg vehicle)"/>
         <arg name="sdf" value="$(arg sdf)"/>
+        <arg name="world" value="$(arg world)"/>
     </include>
+
 
 </launch>
