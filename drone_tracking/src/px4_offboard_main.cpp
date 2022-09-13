@@ -39,8 +39,8 @@ int main(int argc, char **argv)
 
     const float dt = 1/rate_val;
     const float gain_tol = 0.05; //meters threshhold to stay in middle of tag
-    const float drop_height = 0.5;
-    const float drop_rate = 0.1;
+    const float drop_height = 1.0;
+    const float drop_rate = 0.25;
 
 
     ros::Rate rate(rate_val);
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
         PID pid_x(kp, ki, kd, dt, px4drone.kf_tag[0], px4drone.odom[0]);
         PID pid_y(kp, ki, kd, dt, px4drone.kf_tag[1], px4drone.odom[1]);
         
-        //set initial offboard
+        //set initial offboard need to set this as case 
         if( px4drone.current_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0))){
             if( px4drone.set_mode_client.call(px4drone.set_mode) &&
@@ -168,22 +168,24 @@ int main(int argc, char **argv)
                 break;
             }
 
+            case 3: 
+            {
+                px4drone.lqr_track();
+                break;   
+            }
+
+            case 4:
+            {
+                px4drone.lqr_land(drop_height, drop_rate, rate);
+                break;   
+            }
+
             default: 
             {
                 px4drone.send_global_waypoints(init_pos);
             }
         }
 
-        // //landing
-        // if (px4drone.odom[2] >= 10){
-        //     px4drone.set_mode.request.custom_mode ="AUTO.LAND";
-        //     px4drone.arm_cmd.request.value = false;
-        //     while(ros::ok() && (px4drone.current_state.mode != "AUTO.LAND")){
-        //         px4drone.setmode_arm(last_request, px4drone.set_mode.request.custom_mode , px4drone.arm_cmd);
-        //         ros::spinOnce();
-        //         rate.sleep();    
-        //     }
-        // }
         ros::spinOnce();
         rate.sleep();
     }

@@ -28,8 +28,12 @@ class PX4Offboard
 
         ros::Subscriber state_sub, quad_odom_sub;
         ros::Subscriber rtag_quad_sub, rtag_ekf_sub;
-        ros::Subscriber service_input_sub;
+        ros::Subscriber service_input_sub, lqr_gain_sub;
 
+        Eigen::Vector4d lqr_gain_x;
+        Eigen::Vector4d lqr_gain_y;
+
+        geometry_msgs::TwistStamped cmd_vel;   
 
     public:
 
@@ -55,6 +59,8 @@ class PX4Offboard
         void quad_odom_cb(const nav_msgs::Odometry::ConstPtr& msg);
         void kftag_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
         void user_cmd_cb(const std_msgs::Int8::ConstPtr& msg);
+        void lqr_cb(const drone_tracking::LQRGain::ConstPtr& msg);
+
 
         //commands
         void setmode_arm(ros::Time last_request,const std::string& mode_input, 
@@ -66,6 +72,10 @@ class PX4Offboard
         void begin_land_protocol(Eigen::Vector2d gain, ros::Rate rate,
                              float land_height, float dropping); 
 
+        //lqr stuff
+        void lqr_track();
+        void lqr_land(float land_height, float drop_rate, ros::Rate rate);
+        void lqr_precland(float z_val);
 
 };
 

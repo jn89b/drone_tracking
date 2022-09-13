@@ -32,6 +32,11 @@ PX4Offboard::PX4Offboard(ros::NodeHandle* nh)
                     ("utm_control", 30, &PX4Offboard::user_cmd_cb,this);
     
 
+    //lqr sub
+    lqr_gain_sub = nh->subscribe<drone_tracking::LQRGain>
+                    ("K_gain", 30, &PX4Offboard::lqr_cb,this);
+
+
     //services
     arming_client = nh->serviceClient<mavros_msgs::CommandBool>
         ("mavros/cmd/arming");
@@ -153,6 +158,23 @@ void PX4Offboard::user_cmd_cb(const std_msgs::Int8::ConstPtr& msg)
     user_cmd = msg->data;
 }
 
+void PX4Offboard::lqr_cb(const drone_tracking::LQRGain::ConstPtr& msg)
+{
+    /*0 - 3 is x,xdot, pitch, pitch_dot
+      4 - 7 is y,ydot, roll, roll_dot   
+     x*/
+    lqr_gain_x[0] = msg->data[0];
+    lqr_gain_x[1] = msg->data[1];
+    lqr_gain_x[2] = msg->data[2];
+    lqr_gain_x[3] = msg->data[3];
+    
+    lqr_gain_y[0] = msg->data[4];
+    lqr_gain_y[1] = msg->data[5];
+    lqr_gain_y[2] = msg->data[6];
+    lqr_gain_y[3] = msg->data[7];
+
+}
+
 void PX4Offboard::begin_land_protocol(Eigen::Vector2d gain, ros::Rate rate,
                                     float land_height, float dropping)
 {   
@@ -181,6 +203,75 @@ void PX4Offboard::begin_land_protocol(Eigen::Vector2d gain, ros::Rate rate,
             ros::spinOnce();
             rate.sleep();
             if (user_cmd != 2) 
+            {
+                ROS_INFO("I hear a different command");
+                return;
+            }
+        }
+    }
+}
+
+void PX4Offboard::lqr_track()
+{
+    // mavros_msgs::AttitudeTarget bodyrate_msg;
+    // bodyrate_msg.body_rate.x = 0.0;
+    // bodyrate_msg.body_rate.y = 1.0;
+    // bodyrate_msg.body_rate.z = 0.0;
+    // bodyrate_msg.thrust = 0.4;
+    // bodyrate_msg.type_mask = 128;
+    // cmd_raw.publish(bodyrate_msg); 
+
+    // this is better
+    cmd_vel.twist.linear.x = lqr_gain_x[1];
+    cmd_vel.twist.angular.x = lqr_gain_x[3];
+    
+    cmd_vel.twist.linear.y = lqr_gain_y[1];
+    cmd_vel.twist.angular.y = lqr_gain_y[3];
+    //cmd_vel.twist.linear.y = vel[1] + gain[1];
+    vel_pub.publish(cmd_vel);
+}
+
+void PX4Offboard::lqr_precland(float z_val)
+{
+    // mavros_msgs::AttitudeTarget bodyrate_msg;
+    // bodyrate_msg.body_rate.x = 0.0;
+    // bodyrate_msg.body_rate.y = 1.0;
+    // bodyrate_msg.body_rate.z = 0.0;
+    // bodyrate_msg.thrust = 0.4;
+    // bodyrate_msg.type_mask = 128;
+    // cmd_raw.publish(bodyrate_msg); 
+
+    // this is better
+    cmd_vel.twist.linear.x = lqr_gain_x[1];
+    cmd_vel.twist.angular.x = lqr_gain_x[3];
+
+    cmd_vel.twist.linear.y = lqr_gain_y[1];
+    cmd_vel.twist.angular.y = lqr_gain_y[3];
+    
+    cmd_vel.twist.linear.z = z_val;
+
+    //cmd_vel.twist.linear.y = vel[1] + gain[1];
+    vel_pub.publish(cmd_vel);
+}
+
+void PX4Offboard::lqr_land(float land_height, float drop_rate,ros::Rate rate)
+{   
+
+    if (abs(odom[2])>= land_height){
+        lqr_precland(-drop_rate);
+        std::cout<<"not there yet"<<odom[2]<<std::endl;
+    }
+    else{
+        std::cout<<"I'm here"<<odom[2]<< std::endl;
+        ros::Time last_request = ros::Time::now();  
+        set_mode.request.custom_mode = "AUTO.LAND";
+        arm_cmd.request.value = false;
+        while(ros::ok() && (current_state.mode != "AUTO.LAND")){
+            lqr_precland(0.0);
+            setmode_arm(last_request, set_mode.request.custom_mode , arm_cmd);
+            ros::spinOnce();
+            rate.sleep();
+            if (user_cmd != 4) 
             {
                 ROS_INFO("I hear a different command");
                 return;

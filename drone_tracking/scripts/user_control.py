@@ -20,8 +20,8 @@ class UserControl():
 
         """
         1 = TRACK
-        2 = PRECLAND
-        3 = LAND
+        2 = PRECLANDPID
+        3 = LANDPID
         4 = DISARM 
         5 = WAYPOINT
         """
@@ -30,7 +30,9 @@ class UserControl():
             "PRECLAND": self.precland_cmd,  
             "LAND": self.land_cmd,
             "DISARM": self.disarm_cmd,
-            "WAYPOINT": self.waypoint_cmd
+            "WAYPOINT": self.waypoint_cmd,
+            "LQRTRACK": self.lqr_track,
+            "LQRLAND": self.lqr_land
         }
         self.cmd = None
 
@@ -63,6 +65,16 @@ class UserControl():
         self.user_control_pub.publish(self.user_input)
         self.check_permission
 
+    def lqr_track(self):
+        self.user_input.data = 3
+        self.user_control_pub.publish(self.user_input)
+        self.check_permission
+
+    def lqr_land(self):
+        self.user_input.data = 4
+        self.user_control_pub.publish(self.user_input)
+        self.check_permission
+
     def check_permission(self):
         self.user_control_pub.publish(self.user)
         if self.target_found == True or self.z < 0.8: #probably need to set this better 
@@ -90,7 +102,7 @@ class UserControl():
         self.cmd = input("Enter your command: ")
         
         if self.cmd in self.user_cmds_dict:
-            print("Starting command", self.cmd, ",to exit press ENTER")
+            print("Starting command", self.cmd, ",to exit press CTRL+C")
     
             while True:
                 try:
