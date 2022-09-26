@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
     PX4Offboard px4drone(&_nh);
 
-    std::vector<float> init_pos = {1.0, 1.0, 5.0};
+    std::vector<float> init_pos = {1.0, 1.0, 3.0};
 
     px4drone.send_init_cmds(init_pos, rate);
     px4drone.set_mode.request.custom_mode = "OFFBOARD";

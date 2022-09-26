@@ -10,11 +10,12 @@ PX4Offboard::PX4Offboard(ros::NodeHandle* nh)
     vel_pub = nh->advertise<geometry_msgs::TwistStamped>
             ("mavros/setpoint_velocity/cmd_vel", 30);
 
-    cmd_raw = nh->advertise<mavros_msgs::AttitudeTarget>
-            ("mavros/setpoint_raw/attitude", 30);
+    cmd_raw = nh->advertise<mavros_msgs::PositionTarget>
+            ("mavros/setpoint_raw/local", 30);
 
     att_pub = nh->advertise<mavros_msgs::AttitudeTarget>
             ("mavros/setpoint_raw/attitude", 30);
+
 
     //subscribers
 
@@ -71,10 +72,17 @@ void PX4Offboard::send_init_cmds(std::vector<float> position, ros::Rate rate)
 
 void PX4Offboard::send_global_waypoints(std::vector<float> wp_vector){
      //send initial points subtract the offset position from spawn
-    pose.pose.position.x = wp_vector[0]; 
-    pose.pose.position.y = wp_vector[1];
-    pose.pose.position.z = wp_vector[2];
-    local_pos_pub.publish(pose);   
+    // pose.pose.position.x = wp_vector[0]; 
+    // pose.pose.position.y = wp_vector[1];
+    // pose.pose.position.z = wp_vector[2];
+    // local_pos_pub.publish(pose);
+    raw_pose.type_mask = 1024;
+    raw_pose.coordinate_frame = 1;
+    raw_pose.position.x = wp_vector[0];
+    raw_pose.position.y = wp_vector[1];
+    raw_pose.position.z = wp_vector[2];
+    cmd_raw.publish(raw_pose);
+
 }
 
 void PX4Offboard::set_offboard(std::vector<float> pos_cmd,  ros::Rate rate)

@@ -13,6 +13,7 @@
 #include <nav_msgs/Odometry.h>
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/AttitudeTarget.h>
+#include <mavros_msgs/PositionTarget.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
 #include <math.h>  
@@ -43,6 +44,7 @@ class PX4Offboard
         //attributes, need to see which ones should be private
         ros::ServiceClient arming_client, set_mode_client;
         geometry_msgs::PoseStamped pose;
+        mavros_msgs::PositionTarget raw_pose;
         mavros_msgs::SetMode set_mode;
         mavros_msgs::CommandBool arm_cmd;
         mavros_msgs::State current_state;
@@ -75,7 +77,7 @@ class PX4Offboard
         //lqr stuff
         void lqr_track();
         void lqr_land(float land_height, float drop_rate, ros::Rate rate);
-        void lqr_precland(float z_val);
+        void lqr_precland(float z_val); 
 
 };
 

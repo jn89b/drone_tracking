@@ -10,7 +10,7 @@ from apriltag_ros.msg import AprilTagDetectionArray
 class AprilTagPositionPub():
     def __init__(self):
         #apriltag id 
-        self.tag_id_ = rospy.get_param("~tag_id",0)
+        self.tag_id_ = rospy.get_param("~tag_id",2)
         self.new_tf = rospy.get_param("~rtag_drone", "/tag_wrt_drone0")       
         self.drone_frame_id_ = rospy.get_param("~quad_tf", "/drone0_wrt_world")
         self.tag_frame_id_ = rospy.get_param("~tag_frame_id", "/tag_0")
@@ -71,16 +71,29 @@ class AprilTagPositionPub():
             pose_msg = PoseStamped()
             pose_msg.header.frame_id = self.new_tf
             pose_msg.header.stamp = rospy.Time.now()
-            pose_msg.pose.position.x = trans[0]/scale_factor
-            pose_msg.pose.position.y = (trans[1]/scale_factor)
-            pose_msg.pose.position.z = trans[2] - camera_offset_z
-            pose_msg.pose.orientation.x = rot[0]
-            pose_msg.pose.orientation.y = rot[1]
-            pose_msg.pose.orientation.z = rot[2]
+            pose_msg.pose.position.x = -y#trans[0]/scale_factor
+            pose_msg.pose.position.y = -x#(trans[1]/scale_factor)
+            pose_msg.pose.position.z = -z#trans[2] - camera_offset_z
+            pose_msg.pose.orientation.x = rot[2]
+            pose_msg.pose.orientation.y = -rot[0]
+            pose_msg.pose.orientation.z = -rot[1]
             pose_msg.pose.orientation.w = rot[3]
             self.pose_pub_.publish(pose_msg)
+            #sending transform rtagwrtdrone Rtag/        
+    
+            # pose_msg = PoseStamped()
+            # pose_msg.header.frame_id = self.new_tf
+            # pose_msg.header.stamp = rospy.Time.now()
+            # pose_msg.pose.position.x = trans[0]/scale_factor
+            # pose_msg.pose.position.y = (trans[1]/scale_factor)
+            # pose_msg.pose.position.z = trans[2] - camera_offset_z
+            # pose_msg.pose.orientation.x = rot[0]
+            # pose_msg.pose.orientation.y = rot[1]
+            # pose_msg.pose.orientation.z = rot[2]
+            # pose_msg.pose.orientation.w = rot[3]
+            # self.pose_pub_.publish(pose_msg)
             #sending transform rtagwrtdrone Rtag/drone
-            self.br.sendTransform((trans[0]/scale_factor,trans[1]/scale_factor, trans[2]- camera_offset_z),(rot[0],rot[1],rot[2],rot[3]),now,self.new_tf, self.drone_frame_id_)
+            #self.br.sendTransform((trans[0]/scale_factor,trans[1]/scale_factor, trans[2]- camera_offset_z),(rot[0],rot[1],rot[2],rot[3]),now,self.new_tf, self.drone_frame_id_)
             
         else:
             pass
@@ -88,7 +101,7 @@ class AprilTagPositionPub():
 if __name__ == '__main__':
     rospy.init_node('apriltag_position_pub', anonymous=True)
 
-    rate_val = 10
+    rate_val = 20
     #rate = rospy.Rate(rate_val)
     
     sp_o = AprilTagPositionPub()
