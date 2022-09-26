@@ -21,7 +21,7 @@ class OdomLoc():
         self.z = msg.pose.position.z
 
 
-quad_topic = "mavros/offset_local_position/pose"
+quad_topic = "mavros/local_position/pose"
 quad = OdomLoc(quad_topic)
 
 tag_topic_filtered = "kf_tag/pose"
@@ -43,7 +43,7 @@ myData = ["time","quad x", "quad y", "quad z", "kftag x", "kftag y", "kftag z", 
 # the syntax for the command to set the time is:  bashrc: $ sudo time -s "Mon Aug 26 22:20:00 CDT 2019"
 # note that the path used here is an absolute path, if you want to put the log files somewhere else you will need
 # to include an updated absolute path here to the new directory where you want the files to appear
-fileNameBase = "/chome/jnguyen/catkin_ws/src/utm/utm/scripts/logfiles/" + datetime.datetime.now().strftime("%b_%d_%H_%M")
+fileNameBase = "/home/justin/catkin_ws/src/drone_tracking/drone_tracking/scripts/logfiles/" + datetime.datetime.now().strftime("%b_%d_%H_%M")
 fileNameSuffix = ".csv"
 # num is used for incrementing the file path if we already have a file in the directory with the same name
 num = 1

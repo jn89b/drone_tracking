@@ -1,14 +1,12 @@
 <launch>
-<!--launch px4 first then launch this-->
+    <include file="$(find mavros)/launch/px4.launch">            
+    </include>    
 
-    <!-- launch px4
-    </>
+    <include file="$(find drone_tracking)/launch/broadcast_tf.launch">            
+    </include>    
 
-    <!-- launch camera plugin-->
-    <include file="$(find drone_tracking)/launch/apriltag_camera_launch.launch"/>
+    <include file="$(find drone_tracking)/launch/apriltag_camera_launch.launch">            
+    </include>    
 
-    <!-- launch tf broadcaster-->
-    <include file="$(find drone_tracking)/launch/broadcast_tf.launch"/>
-    
 
 </launch>

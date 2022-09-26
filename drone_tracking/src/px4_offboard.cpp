@@ -267,7 +267,16 @@ void PX4Offboard::lqr_land(float land_height, float drop_rate,ros::Rate rate)
         set_mode.request.custom_mode = "AUTO.LAND";
         arm_cmd.request.value = false;
         while(ros::ok() && (current_state.mode != "AUTO.LAND")){
-            lqr_precland(0.0);
+
+            cmd_vel.twist.linear.x = 0.0;
+            cmd_vel.twist.angular.x = 0.0;
+
+            cmd_vel.twist.linear.y = 0.0;
+            cmd_vel.twist.angular.y = 0.0;
+            
+            cmd_vel.twist.linear.z = -drop_rate/2;
+            vel_pub.publish(cmd_vel);
+
             setmode_arm(last_request, set_mode.request.custom_mode , arm_cmd);
             ros::spinOnce();
             rate.sleep();

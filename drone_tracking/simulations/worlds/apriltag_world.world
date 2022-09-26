@@ -1,4 +1,3 @@
-<?xml version="1.0" ?>
 <sdf version='1.7'>
   <world name='default'>
     <light name='sun' type='directional'>
@@ -110,18 +109,18 @@
         <kinematic>0</kinematic>
       </link>
       <static>1</static>
-      <pose>2 2 0 0 -0 0</pose>
+      <pose>1 1 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>48 793000000</sim_time>
-      <real_time>48 950124810</real_time>
-      <wall_time>1662946736 606436057</wall_time>
-      <iterations>48793</iterations>
+      <sim_time>22 974000000</sim_time>
+      <real_time>23 98920917</real_time>
+      <wall_time>1664215814 316108057</wall_time>
+      <iterations>22974</iterations>
       <model name='Apriltag36_11_00000'>
-        <pose>2 2 0 0 -0 0</pose>
+        <pose>1 1 0 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='main'>
-          <pose>2 2 0 0 -0 0</pose>
+          <pose>1 1 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -143,7 +142,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>6.11284 -6.12159 2.66189 0 0.275643 2.35619</pose>
+        <pose>5 -5 2 0 0.275643 2.35619</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
