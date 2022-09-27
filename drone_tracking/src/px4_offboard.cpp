@@ -60,29 +60,46 @@ void PX4Offboard::send_init_cmds(std::vector<float> position, ros::Rate rate)
         rate.sleep();
     } 
 
-    send_global_waypoints(position);
+    local_pos_pub.publish(pose);
+    //send_global_waypoints(position);
     
     //send a few setpoints before starting
     for(int i = 100; ros::ok() && i > 0; --i){
         local_pos_pub.publish(pose);
+        // send_global_waypoints(position);
         ros::spinOnce();
         rate.sleep();
     }
 }
 
-void PX4Offboard::send_global_waypoints(std::vector<float> wp_vector){
+void PX4Offboard::send_global_waypoints(std::vector<float> wp_vector, int frame_num){
      //send initial points subtract the offset position from spawn
     // pose.pose.position.x = wp_vector[0]; 
     // pose.pose.position.y = wp_vector[1];
     // pose.pose.position.z = wp_vector[2];
     // local_pos_pub.publish(pose);
-    raw_pose.type_mask = 1024;
-    raw_pose.coordinate_frame = 1;
+    raw_pose.type_mask = 3520; //ignore yaw
+    raw_pose.coordinate_frame = frame_num; //framebody ned
+    raw_pose.header.stamp = ros::Time::now();
     raw_pose.position.x = wp_vector[0];
     raw_pose.position.y = wp_vector[1];
     raw_pose.position.z = wp_vector[2];
     cmd_raw.publish(raw_pose);
+}
 
+void PX4Offboard::track(std::vector<float> wp_vector, int frame_num){
+     //send initial points subtract the offset position from spawn
+    // pose.pose.position.x = wp_vector[0]; 
+    // pose.pose.position.y = wp_vector[1];
+    // pose.pose.position.z = wp_vector[2];
+    // local_pos_pub.publish(pose);
+    raw_pose.type_mask = 3527; //ignore yaw
+    raw_pose.coordinate_frame = frame_num; //framebody ned
+    raw_pose.header.stamp = ros::Time::now();
+    raw_pose.velocity.x = wp_vector[0];
+    raw_pose.velocity.y = wp_vector[1];
+    raw_pose.velocity.z = wp_vector[2];
+    cmd_raw.publish(raw_pose);
 }
 
 void PX4Offboard::set_offboard(std::vector<float> pos_cmd,  ros::Rate rate)
@@ -101,7 +118,7 @@ void PX4Offboard::set_offboard(std::vector<float> pos_cmd,  ros::Rate rate)
         set_mode.request.custom_mode = "OFFBOARD";
         arm_cmd.request.value = true;
         setmode_arm(last_request, set_mode.request.custom_mode , arm_cmd);
-        send_global_waypoints(pos_cmd);
+        send_global_waypoints(pos_cmd, 1);
         ros::spinOnce();
         rate.sleep();
     }
@@ -191,13 +208,12 @@ void PX4Offboard::begin_land_protocol(Eigen::Vector2d gain, ros::Rate rate,
     std::vector<float> adjusted_pos{0.0,0.0,0.0};
 
 
-    adjusted_pos[0] = odom[0] + gain[0];
-    adjusted_pos[1] = odom[1] + gain[1];
-
     if (abs(odom[2])>= land_height){
         //std::cout<<"starting to land"<<std::endl;
-        adjusted_pos[2] = odom[2]-dropping;
-        send_global_waypoints(adjusted_pos);
+        adjusted_pos[0] = gain[0];
+        adjusted_pos[1] = gain[1];
+        adjusted_pos[2] = -0.1;
+        track(adjusted_pos, 8);
 
     }
     else{
@@ -205,8 +221,10 @@ void PX4Offboard::begin_land_protocol(Eigen::Vector2d gain, ros::Rate rate,
         set_mode.request.custom_mode = "AUTO.LAND";
         arm_cmd.request.value = false;
         while(ros::ok() && (current_state.mode != "AUTO.LAND")){
-            adjusted_pos[2] = odom[2];
-            send_global_waypoints(adjusted_pos);
+            adjusted_pos[0] = 0.0;
+            adjusted_pos[1] = 0.0;
+            adjusted_pos[2] = -0.1;
+            track(adjusted_pos, 8);
             setmode_arm(last_request, set_mode.request.custom_mode , arm_cmd);
             ros::spinOnce();
             rate.sleep();

@@ -117,7 +117,6 @@ int main(int argc, char **argv)
  
                 {
                     if ((abs(gain[0])<= gain_tol) && (abs(gain[1]) <= gain_tol)){
-                        std::cout<<"good enough"<<gain<<std::endl;
                         px4drone.send_yaw_cmd(no_gain, init_pos[2], drone_yaw);
                         // px4drone.send_velocity_cmd(no_gain);    
                     } 

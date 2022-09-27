@@ -69,7 +69,9 @@ class PX4Offboard
                             mavros_msgs::CommandBool arm_cmd);
 
         void send_init_cmds(std::vector<float> position, ros::Rate rate);
-        void send_global_waypoints(std::vector<float> wp_vector);
+        void send_global_waypoints(std::vector<float> wp_vector, int frame_num);
+        void track(std::vector<float> wp_vector, int frame_num);
+        
         void set_offboard(std::vector<float> pos_cmd,  ros::Rate rate);
         void begin_land_protocol(Eigen::Vector2d gain, ros::Rate rate,
                              float land_height, float dropping); 

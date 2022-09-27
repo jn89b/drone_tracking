@@ -85,7 +85,7 @@ int main(int argc, char **argv)
             case 0: // normal position command
             {
                 if (px4drone.current_state.mode == "OFFBOARD"){
-                    px4drone.send_global_waypoints(init_pos);
+                    px4drone.send_global_waypoints(init_pos, 1);
                 }
                 else{
                     px4drone.set_offboard(init_pos, rate);
@@ -106,52 +106,51 @@ int main(int argc, char **argv)
                 Eigen::Vector2f no_gain(0.0f, 0.0f);
                 std::vector<float> adjusted_pos{0.0,0.0,0.0};
                 
-                float odom_z = px4drone.odom[2];
+                float odom_z = 0.0;//px4drone.odom[2];
 
                 {
                     //check gain tolerances on x and y
                     if ((abs(gain[0])<= gain_tol) && (abs(gain[1]) <= gain_tol)){
                         
                         ROS_INFO("good enough");
-                        adjusted_pos[0] = px4drone.odom[0] + no_gain[0];
-                        adjusted_pos[1] = px4drone.odom[1] + no_gain[1];
+                        adjusted_pos[0] = no_gain[0];
+                        adjusted_pos[1] = no_gain[1];
                         adjusted_pos[2] = odom_z; 
                         
                         // adjusted_pos= {no_gain[0], no_gain[1], odom_z};
-                        px4drone.send_global_waypoints(adjusted_pos);
+                        px4drone.track(adjusted_pos, 8);
                         // px4drone.send_velocity_cmd(no_gain);    
                     } 
                     
                     else if((abs(gain[0])>= gain_tol) && (abs(gain[1]) <= gain_tol)){
                         
                         ROS_INFO("X");
-                        adjusted_pos[0] =  px4drone.odom[0] + gain[0];
-                        adjusted_pos[1] = px4drone.odom[1] + no_gain[1];
+                        adjusted_pos[0] = gain[0];
+                        adjusted_pos[1] = no_gain[1];
                         adjusted_pos[2] = odom_z;
                         
                         // adjusted_pos= {p_x+gain[0], no_gain[1], odom_z};
-                        px4drone.send_global_waypoints(adjusted_pos);
+                        px4drone.track(adjusted_pos, 8);
                         // px4drone.send_velocity_cmd(no_gain);    
                     } 
                     
                     else if((abs(gain[1])>= gain_tol) && (abs(gain[0]) <= gain_tol)){
                         
                         ROS_INFO("Y");
-                        adjusted_pos[0] = px4drone.odom[0] + no_gain[0];
-                        adjusted_pos[1] = px4drone.odom[1] + gain[1];
+                        adjusted_pos[0] = no_gain[0];
+                        adjusted_pos[1] = gain[1];
                         adjusted_pos[2] = odom_z;
                         // adjusted_pos = {no_gain[0], p_y+gain[1], odom_z};
-                        px4drone.send_global_waypoints(adjusted_pos);
+                        px4drone.track(adjusted_pos, 8);
                         // px4drone.send_velocity_cmd(no_gain);    
                     } 
                     
                     else{
-                        ROS_INFO("DO NOTHING");
-                        adjusted_pos[0] = px4drone.odom[0] + gain[0];
-                        adjusted_pos[1] = px4drone.odom[1] + gain[1];
+                        adjusted_pos[0] = gain[0];
+                        adjusted_pos[1] = gain[1];
                         adjusted_pos[2] = odom_z;
                         std::cout<<adjusted_pos[0]<<std::endl;
-                        px4drone.send_global_waypoints(adjusted_pos);
+                        px4drone.track(adjusted_pos, 8);
                     }
                 }   
                 break;
@@ -182,7 +181,7 @@ int main(int argc, char **argv)
 
             default: 
             {
-                px4drone.send_global_waypoints(init_pos);
+                px4drone.send_global_waypoints(init_pos, 1);
             }
         }
 
